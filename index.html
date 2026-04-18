@@ -1,0 +1,826 @@
+# portfolio-image
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>সৃষ্টির শেষে — At the End of Creation</title>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cinzel+Decorative:wght@400;700;900&family=Cinzel:wght@400;600;700&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --gold-dim: #7a6030;
+    --steel: #4a8fa8;
+    --steel-light: #7bbdd4;
+    --steel-dark: #1a3a4a;
+    --ink: #0a0a0f;
+    --parchment: #f5ead8;
+    --mist: rgba(255,255,255,0.06);
+    --divider: rgba(255,255,255,0.08);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--ink);
+    color: #d4c9b8;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    line-height: 1.7;
+  }
+
+  /* ── STAR FIELD ── */
+  #stars-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1;
+    overflow: hidden;
+  }
+
+  .hero-split {
+    position: absolute;
+    inset: 0;
+    display: flex;
+  }
+
+  .hero-left {
+    flex: 1;
+    background: linear-gradient(135deg, rgba(15,10,0,0.9) 0%, rgba(40,28,5,0.6) 50%, transparent 100%);
+    border-right: 1px solid rgba(201,168,76,0.15);
+  }
+
+  .hero-right {
+    flex: 1;
+    background: linear-gradient(225deg, rgba(0,10,20,0.9) 0%, rgba(5,25,40,0.6) 50%, transparent 100%);
+  }
+
+  .hero-center-line {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, rgba(201,168,76,0.4) 20%, rgba(74,143,168,0.4) 80%, transparent);
+    transform: translateX(-50%);
+    z-index: 2;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    padding: 2rem;
+    max-width: 900px;
+  }
+
+  .badge {
+    display: inline-block;
+    letter-spacing: 0.35em;
+    font-size: 0.65rem;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--gold);
+    border: 1px solid var(--gold-dim);
+    padding: 0.4em 1.2em;
+    margin-bottom: 2.5rem;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.3s forwards;
+  }
+
+  .hero-bengali {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(1.4rem, 4vw, 2.4rem);
+    font-weight: 400;
+    color: rgba(201,168,76,0.5);
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.6s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: clamp(2.2rem, 6vw, 5rem);
+    font-weight: 900;
+    line-height: 1.1;
+    background: linear-gradient(135deg, var(--gold-light) 0%, #fff8ec 40%, var(--steel-light) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.4rem;
+    opacity: 0;
+    animation: fadeUp 1.1s ease 0.9s forwards;
+  }
+
+  .hero-subtitle {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: clamp(1rem, 2vw, 1.4rem);
+    color: rgba(212,201,184,0.6);
+    letter-spacing: 0.05em;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.1s forwards;
+  }
+
+  .hero-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 3rem;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.3s forwards;
+  }
+
+  .hero-divider span { font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; color: var(--gold-dim); letter-spacing: 0.2em; }
+  .hero-divider-line { flex: 1; max-width: 80px; height: 1px; background: linear-gradient(to right, transparent, var(--gold-dim)); }
+  .hero-divider-line.right { background: linear-gradient(to left, transparent, var(--steel-dark)); }
+
+  .hero-tagline {
+    font-family: 'IM Fell English', serif;
+    font-size: clamp(0.9rem, 1.8vw, 1.15rem);
+    color: rgba(212,201,184,0.75);
+    max-width: 650px;
+    margin: 0 auto 3rem;
+    line-height: 1.9;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.5s forwards;
+  }
+
+  .hero-meta {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.7s forwards;
+  }
+
+  .meta-pill {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    padding: 0.45em 1em;
+    border: 1px solid var(--divider);
+    color: rgba(212,201,184,0.5);
+    text-transform: uppercase;
+  }
+
+  .scroll-cue {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    opacity: 0;
+    animation: fadeIn 1s ease 2.5s forwards;
+  }
+
+  .scroll-cue span { font-family: 'Share Tech Mono', monospace; font-size: 0.6rem; color: var(--gold-dim); letter-spacing: 0.25em; }
+
+  .scroll-line {
+    width: 1px;
+    height: 50px;
+    background: linear-gradient(to bottom, var(--gold-dim), transparent);
+    animation: scrollPulse 2s ease-in-out infinite;
+  }
+
+  /* ── SECTION BASE ── */
+  section {
+    position: relative;
+    z-index: 1;
+    padding: 6rem 2rem;
+  }
+
+  .container { max-width: 1000px; margin: 0 auto; }
+
+  .section-eyebrow {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.35em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(1.6rem, 3.5vw, 2.8rem);
+    font-weight: 600;
+    color: #f0e6d0;
+    line-height: 1.2;
+    margin-bottom: 3rem;
+  }
+
+  /* ── DUAL TIMELINE ── */
+  .timelines {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border: 1px solid var(--divider);
+  }
+
+  .timeline-panel {
+    padding: 3rem 2.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .timeline-panel::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0.03;
+  }
+
+  .timeline-ancient {
+    background: linear-gradient(160deg, rgba(40,28,5,0.8), rgba(15,10,2,0.95));
+    border-right: 1px solid rgba(201,168,76,0.2);
+  }
+
+  .timeline-ancient::before {
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23c9a84c' fill-opacity='0.15'%3E%3Ccircle cx='5' cy='5' r='1'/%3E%3Ccircle cx='35' cy='35' r='1'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  .timeline-modern {
+    background: linear-gradient(200deg, rgba(5,15,25,0.9), rgba(0,8,18,0.98));
+  }
+
+  .timeline-modern::before {
+    background: repeating-linear-gradient(0deg, transparent, transparent 49px, rgba(74,143,168,0.04) 50px),
+                repeating-linear-gradient(90deg, transparent, transparent 49px, rgba(74,143,168,0.04) 50px);
+  }
+
+  .timeline-era {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+  }
+
+  .era-ancient { color: var(--gold); }
+  .era-modern { color: var(--steel-light); }
+
+  .timeline-character {
+    font-family: 'Cinzel', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    line-height: 1.2;
+  }
+
+  .char-ancient { color: var(--gold-light); }
+  .char-modern { color: var(--steel-light); }
+
+  .timeline-role {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+    opacity: 0.55;
+  }
+
+  .timeline-desc {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    opacity: 0.75;
+    margin-bottom: 2rem;
+  }
+
+  .timeline-truth {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: 0.88rem;
+    line-height: 1.7;
+    padding: 1.2rem 1.5rem;
+    border-left: 2px solid;
+    opacity: 0.7;
+  }
+
+  .truth-ancient {
+    border-color: var(--gold-dim);
+    color: var(--gold-light);
+    background: rgba(201,168,76,0.04);
+  }
+
+  .truth-modern {
+    border-color: var(--steel-dark);
+    color: var(--steel-light);
+    background: rgba(74,143,168,0.04);
+  }
+
+  /* ── THEMES ── */
+  .themes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1px;
+    background: var(--divider);
+    border: 1px solid var(--divider);
+    margin-bottom: 4rem;
+  }
+
+  .theme-cell {
+    background: rgba(10,10,15,0.95);
+    padding: 2rem 1.8rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.3s ease;
+  }
+
+  .theme-cell:hover { background: rgba(20,18,12,0.95); }
+
+  .theme-num {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 3rem;
+    font-weight: 900;
+    opacity: 0.06;
+    position: absolute;
+    top: 0.5rem;
+    right: 1rem;
+    color: #fff;
+    line-height: 1;
+  }
+
+  .theme-icon {
+    width: 32px;
+    height: 2px;
+    margin-bottom: 1.2rem;
+  }
+
+  .theme-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #f0e6d0;
+    margin-bottom: 0.6rem;
+    letter-spacing: 0.05em;
+  }
+
+  .theme-desc {
+    font-size: 0.82rem;
+    line-height: 1.7;
+    opacity: 0.5;
+  }
+
+  /* ── CENTRAL QUESTION ── */
+  .question-section {
+    text-align: center;
+    padding: 8rem 2rem;
+    background: linear-gradient(180deg, transparent, rgba(201,168,76,0.03) 30%, rgba(74,143,168,0.03) 70%, transparent);
+    border-top: 1px solid var(--divider);
+    border-bottom: 1px solid var(--divider);
+  }
+
+  .question-pre {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.4em;
+    color: var(--gold-dim);
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+  }
+
+  .question-text {
+    font-family: 'IM Fell English', serif;
+    font-style: italic;
+    font-size: clamp(1.2rem, 3vw, 2rem);
+    color: rgba(240,230,208,0.85);
+    max-width: 750px;
+    margin: 0 auto 1.5rem;
+    line-height: 1.7;
+  }
+
+  .question-accent {
+    font-family: 'IM Fell English', serif;
+    font-size: clamp(0.9rem, 1.5vw, 1.1rem);
+    color: var(--gold);
+    opacity: 0.7;
+    font-style: italic;
+  }
+
+  /* ── PRODUCTION INFO ── */
+  .production-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1px;
+    background: var(--divider);
+    border: 1px solid var(--divider);
+  }
+
+  .prod-cell {
+    background: rgba(8,8,12,0.97);
+    padding: 1.8rem 2rem;
+  }
+
+  .prod-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.3em;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+
+  .prod-value {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 400;
+    font-size: 0.92rem;
+    color: rgba(240,230,208,0.8);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 4rem 2rem;
+    border-top: 1px solid var(--divider);
+  }
+
+  .footer-mark {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    background: linear-gradient(135deg, var(--gold), var(--steel-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+  }
+
+  .footer-line {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: rgba(212,201,184,0.25);
+    text-transform: uppercase;
+  }
+
+  /* ── VISUAL ORNAMENT ── */
+  .ornament {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+
+  .orn-line { flex: 1; height: 1px; background: var(--divider); }
+  .orn-diamond {
+    width: 8px; height: 8px;
+    border: 1px solid var(--gold-dim);
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; transform: scaleY(1); }
+    50% { opacity: 1; transform: scaleY(0.7); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .reveal-delay-1 { transition-delay: 0.15s; }
+  .reveal-delay-2 { transition-delay: 0.3s; }
+  .reveal-delay-3 { transition-delay: 0.45s; }
+
+  /* ── DUAL GLOW BEHIND TITLE ── */
+  .glow-left {
+    position: absolute;
+    left: 15%;
+    top: 35%;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .glow-right {
+    position: absolute;
+    right: 15%;
+    top: 35%;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(74,143,168,0.08) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  @media (max-width: 700px) {
+    .timelines { grid-template-columns: 1fr; }
+    .timeline-ancient { border-right: none; border-bottom: 1px solid rgba(201,168,76,0.2); }
+    .hero-title { font-size: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="stars-canvas"></canvas>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-split">
+    <div class="hero-left"></div>
+    <div class="hero-right"></div>
+  </div>
+  <div class="hero-center-line"></div>
+  <div class="glow-left"></div>
+  <div class="glow-right"></div>
+
+  <div class="hero-content">
+    <div class="badge">Original Screenplay · Feature Film Concept</div>
+
+    <div class="hero-bengali">সৃষ্টির শেষে ঈশ্বর</div>
+    <h1 class="hero-title">Where Does He Look</h1>
+    <p class="hero-subtitle">A Dual-Timeline Philosophical Epic</p>
+
+    <div class="hero-divider">
+      <div class="hero-divider-line"></div>
+      <span>Bengal · Medieval</span>
+      <span style="color:rgba(255,255,255,0.2)">✦</span>
+      <span style="color:var(--steel-light)">Science · War III</span>
+      <div class="hero-divider-line right"></div>
+    </div>
+
+    <p class="hero-tagline">
+      If every creation demands a creator — and creativity itself has no end —
+      then God exists. But where, in all our suffering, does He look?
+    </p>
+
+    <div class="hero-meta">
+      <span class="meta-pill">Philosophical Sci-Fi</span>
+      <span class="meta-pill">Bengali / English</span>
+      <span class="meta-pill">Dual Timeline</span>
+      <span class="meta-pill">Original Screenplay</span>
+    </div>
+  </div>
+
+  <div class="scroll-cue">
+    <span>Descend</span>
+    <div class="scroll-line"></div>
+  </div>
+</div>
+
+
+<!-- DUAL TIMELINE SECTION -->
+<section>
+  <div class="container">
+    <div class="reveal">
+      <p class="section-eyebrow">The Two Worlds</p>
+      <h2 class="section-title">A Story Told Across Time</h2>
+    </div>
+
+    <div class="timelines reveal reveal-delay-1">
+
+      <!-- ANCIENT -->
+      <div class="timeline-panel timeline-ancient">
+        <div class="timeline-era era-ancient">◆ &nbsp;Bengal · Medieval Era</div>
+        <h3 class="timeline-character char-ancient">The Monk</h3>
+        <p class="timeline-role">Seeker of the Physical Divine</p>
+        <p class="timeline-desc">
+          A Bengali monk abandons the sanctuary of his monastery and walks into the dangerous, unknowable world beyond — carrying nothing but a question that has consumed his soul: Does God have a body? Does He breathe? Does He hunger?
+          <br><br>
+          His pilgrimage through forest, plague, and betrayal becomes a meditation on faith untethered from institution — raw, desperate, and terrifyingly sincere.
+        </p>
+        <div class="timeline-truth truth-ancient">
+          "I have read every scripture. I have repeated every prayer. But I have never touched Him. If He made me with hands, why does He hide from mine?"
+        </div>
+      </div>
+
+      <!-- MODERN -->
+      <div class="timeline-panel timeline-modern">
+        <div class="timeline-era era-modern">◈ &nbsp;Modern Era · World War III</div>
+        <h3 class="timeline-character char-modern">The Scientist</h3>
+        <p class="timeline-role">Architect of a Hollow Victory</p>
+        <p class="timeline-desc">
+          Driven by ambition in the chaos of a collapsing world, a scientist races toward a discovery that could end the war — or define who wins it. He operates in a universe of equations, where God is either dead or irrelevant.
+          <br><br>
+          But as his breakthrough arrives, a creeping dread follows: what if the victory he has built is not real? What if he is himself a creation — and someone, somewhere, is watching?
+        </p>
+        <div class="timeline-truth truth-modern">
+          "I have found the pattern beneath everything. Every system has an origin. Every origin has a cause. The chain does not end — and that terrifies me more than any war."
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- CENTRAL QUESTION -->
+<div class="question-section">
+  <p class="question-pre">The Singular Truth</p>
+  <p class="question-text">
+    "If every creation demands a creator, and creativity itself has no end —
+    then God exists. But where, in all our suffering, does He look?"
+  </p>
+  <p class="question-accent">— the question that binds both timelines</p>
+</div>
+
+
+<!-- THEMES -->
+<section>
+  <div class="container">
+    <div class="reveal">
+      <p class="section-eyebrow">Thematic Architecture</p>
+      <h2 class="section-title">What the Film Confronts</h2>
+    </div>
+
+    <div class="ornament reveal">
+      <div class="orn-line"></div>
+      <div class="orn-diamond"></div>
+      <div class="orn-line"></div>
+    </div>
+
+    <div class="themes-grid reveal reveal-delay-1">
+
+      <div class="theme-cell">
+        <div class="theme-num">I</div>
+        <div class="theme-icon" style="background: linear-gradient(to right, var(--gold), transparent);"></div>
+        <div class="theme-name">Existence</div>
+        <div class="theme-desc">What does it mean to exist — for a god, for a human, for a world built on suffering and wonder?</div>
+      </div>
+
+      <div class="theme-cell">
+        <div class="theme-num">II</div>
+        <div class="theme-icon" style="background: linear-gradient(to right, var(--steel), transparent);"></div>
+        <div class="theme-name">Faith vs. Science</div>
+        <div class="theme-desc">Two centuries, two men, two languages for the same unanswerable longing. Neither wins. Neither loses.</div>
+      </div>
+
+      <div class="theme-cell">
+        <div class="theme-num">III</div>
+        <div class="theme-icon" style="background: linear-gradient(to right, #a86060, transparent);"></div>
+        <div class="theme-name">Human Arrogance</div>
+        <div class="theme-desc">The monk believes he can find God. The scientist believes he can outrun fate. Both are wrong — and terrifyingly right.</div>
+      </div>
+
+      <div class="theme-cell">
+        <div class="theme-num">IV</div>
+        <div class="theme-icon" style="background: linear-gradient(to right, #608a60, transparent);"></div>
+        <div class="theme-name">The Chain of Creation</div>
+        <div class="theme-desc">Every creator was created. Every answer births a question. The chain is infinite — and somewhere at its origin, something watches.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- PRODUCTION DETAILS -->
+<section>
+  <div class="container">
+    <div class="reveal">
+      <p class="section-eyebrow">Production Overview</p>
+      <h2 class="section-title">Project Details</h2>
+    </div>
+
+    <div class="production-grid reveal reveal-delay-1">
+      <div class="prod-cell">
+        <div class="prod-label">Format</div>
+        <div class="prod-value">Feature Film</div>
+      </div>
+      <div class="prod-cell">
+        <div class="prod-label">Genre</div>
+        <div class="prod-value">Philosophical Sci-Fi / Historical Drama</div>
+      </div>
+      <div class="prod-cell">
+        <div class="prod-label">Language</div>
+        <div class="prod-value">Bengali & English (Dual Language)</div>
+      </div>
+      <div class="prod-cell">
+        <div class="prod-label">Structure</div>
+        <div class="prod-value">Non-linear Dual Timeline</div>
+      </div>
+      <div class="prod-cell">
+        <div class="prod-label">Status</div>
+        <div class="prod-value">Original Screenplay — In Writing</div>
+      </div>
+      <div class="prod-cell">
+        <div class="prod-label">Runtime</div>
+        <div class="prod-value">Currently Undefined</div>
+      </div>
+      <div class="prod-cell">
+        <div class="prod-label">Setting I</div>
+        <div class="prod-value">Medieval Bengal — Forests, Monasteries, Ancient Roads</div>
+      </div>
+      <div class="prod-cell">
+        <div class="prod-label">Setting II</div>
+        <div class="prod-value">Modern World — World War III, Research Facilities, Ruin</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-mark">সৃষ্টির শেষে ঈশ্বর</div>
+  <div class="footer-line">Original Screenplay · Philosophical Sci-Fi · Bengali / English</div>
+  <br>
+  <div class="footer-line" style="opacity:0.15;">Portfolio Concept Page · Feature Film Treatment</div>
+</footer>
+
+
+<script>
+const canvas = document.getElementById('stars-canvas');
+const ctx = canvas.getContext('2d');
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+
+resize();
+window.addEventListener('resize', resize);
+
+const stars = Array.from({length: 280}, () => ({
+  x: Math.random() * canvas.width,
+  y: Math.random() * canvas.height,
+  r: Math.random() * 1.2 + 0.2,
+  a: Math.random(),
+  da: (Math.random() - 0.5) * 0.004,
+  side: Math.random() > 0.5 ? 'left' : 'right'
+}));
+
+function drawStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const cx = canvas.width / 2;
+
+  stars.forEach(s => {
+    s.a = Math.max(0.05, Math.min(1, s.a + s.da));
+    if (s.a <= 0.05 || s.a >= 1) s.da *= -1;
+
+    let color;
+    if (s.x < cx) {
+      color = `rgba(201,168,76,${s.a * 0.6})`;
+    } else {
+      color = `rgba(74,143,168,${s.a * 0.5})`;
+    }
+
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+  });
+
+  requestAnimationFrame(drawStars);
+}
+
+drawStars();
+
+const revealEls = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12 });
+
+revealEls.forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
